@@ -22,7 +22,7 @@ if(!defined("IN_MYBB"))
 	die("Direct initialization of this file is not allowed.<br /><br />Please make sure IN_MYBB is defined.");
 }
 
-$plugins->add_hook('global_start', 'cookielaw_global_intermediate');
+$plugins->add_hook('global_start', 'cookielaw_global_start');
 $plugins->add_hook('global_intermediate', 'cookielaw_global_intermediate');
 $plugins->add_hook('global_end', 'cookielaw_global_end');
 $plugins->add_hook('misc_start', 'cookielaw_misc');
@@ -251,6 +251,19 @@ function cookielaw_deactivate()
 	}
 	
 	$db->delete_query("templates", "title IN ('cookielaw_info','cookielaw_header','cookielaw_buttons_notify','cookielaw_buttons_opt','cookielaw_button_more_info','cookielaw_header_no_cookies')");
+}
+
+function cookielaw_global_start()
+{
+
+	global $templatelist;
+
+	if(!isset($templatelist))
+	{
+		$templatelist = '';
+	}
+
+	$templatelist .= ', cookielaw_button_more_info, cookielaw_buttons_notify, cookielaw_header';
 }
 
 function cookielaw_global_intermediate()
@@ -537,4 +550,3 @@ function cookielaw_get_cookies($all = false)
 	
 	return $cookies;
 }
-?>
