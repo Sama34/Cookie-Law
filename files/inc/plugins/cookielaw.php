@@ -22,38 +22,38 @@ if(!defined("IN_MYBB"))
 	die("Direct initialization of this file is not allowed.<br /><br />Please make sure IN_MYBB is defined.");
 }
 
-$plugins->add_hook('global_start', 'cookielaw_global_start');
-$plugins->add_hook('global_intermediate', 'cookielaw_global_intermediate');
-$plugins->add_hook('global_end', 'cookielaw_global_end');
-$plugins->add_hook('misc_start', 'cookielaw_misc');
-$plugins->add_hook('admin_load', 'cookielaw_clear_cookies');
+$plugins->add_hook('global_start', 'overagelaw_global_start');
+$plugins->add_hook('global_intermediate', 'overagelaw_global_intermediate');
+$plugins->add_hook('global_end', 'overagelaw_global_end');
+$plugins->add_hook('misc_start', 'overagelaw_misc');
+$plugins->add_hook('admin_load', 'overagelaw_clear_overages');
 
-function cookielaw_info()
+function overagelaw_info()
 {
 	return array(
-		"name" => "Cookie Law",
-		"description" => "Give information and gain consent for cookies to be set by the forum.",
-		"website" => "https://github.com/MattRogowski/Cookie-Law",
+		"name" => "Overage Law",
+		"description" => "Give information and gain consent for overages to be set by the forum.",
+		"website" => "https://github.com/MattRogowski/Overage-Law",
 		"author" => "Matt Rogowski",
 		"authorsite" => "https://matt.rogow.ski",
 		"version" => "1.0.0",
 		"compatibility" => "16*,18*",
-		"codename" => "cookielaw"
+		"codename" => "overagelaw"
 	);
 }
 
-function cookielaw_activate()
+function overagelaw_activate()
 {
 	global $mybb, $db;
 	
-	cookielaw_deactivate();
+	overagelaw_deactivate();
 	
 	require_once MYBB_ROOT . 'inc/adminfunctions_templates.php';
 	
 	$settings_group = array(
-		"name" => "cookielaw",
-		"title" => "Cookie Law Settings",
-		"description" => "Settings for the cookie law plugin.",
+		"name" => "overagelaw",
+		"title" => "Overage Law Settings",
+		"description" => "Settings for the overage law plugin.",
 		"disporder" => "28",
 		"isdefault" => 0
 	);
@@ -62,9 +62,9 @@ function cookielaw_activate()
 	
 	$settings = array();
 	$settings[] = array(
-		"name" => "cookielaw_method",
+		"name" => "overagelaw_method",
 		"title" => "Display Method",
-		"description" => "How do you want the message to function?<br /><strong>Notify:</strong> A message will be displayed notifying users that cookies are used, but no method of opting out.<br /><strong>Opt In/Out:</strong> Give people a choice on whether they want to accept the use of cookies or not.",
+		"description" => "How do you want the message to function?<br /><strong>Notify:</strong> A message will be displayed notifying users that overages are used, but no method of opting out.<br /><strong>Opt In/Out:</strong> Give people a choice on whether they want to accept the use of overages or not.",
 		"optionscode" => "radio
 notify=Notify
 opt=Opt In/Out",
@@ -88,22 +88,22 @@ opt=Opt In/Out",
 	
 	rebuild_settings();
 	
-	find_replace_templatesets("header", "#".preg_quote('<div id="container">')."#i", '{$cookielaw}<div id="container">');
+	find_replace_templatesets("header", "#".preg_quote('<div id="container">')."#i", '{$overagelaw}<div id="container">');
 	if(substr($mybb->version, 0, 3) == '1.6')
 	{
-		find_replace_templatesets("footer", "#".preg_quote('{$lang->bottomlinks_syndication}</a>')."#i", '{$lang->bottomlinks_syndication}</a> | <a href="{$mybb->settings[\'bburl\']}/misc.php?action=cookielaw_info">{$lang->cookielaw_footer}</a>');
+		find_replace_templatesets("footer", "#".preg_quote('{$lang->bottomlinks_syndication}</a>')."#i", '{$lang->bottomlinks_syndication}</a> | <a href="{$mybb->settings[\'bburl\']}/misc.php?action=overagelaw_info">{$lang->overagelaw_footer}</a>');
 
 		$js_header = "document.observe(\"dom:loaded\", function() {
-	\$('cookies').on('click', '.cookielaw_disallow', function(Event) {
-		if(!confirm('{\$lang->cookielaw_disallow_confirm}'))
+	\$('overages').on('click', '.overagelaw_disallow', function(Event) {
+		if(!confirm('{\$lang->overagelaw_disallow_confirm}'))
 		{
 			Event.stop();
 		}
 	});
 });";
 		$js_info = "document.observe(\"dom:loaded\", function() {
-	\$('container').on('click', '.cookielaw_disallow', function(Event) {
-		if(!confirm('{\$lang->cookielaw_disallow_confirm}'))
+	\$('container').on('click', '.overagelaw_disallow', function(Event) {
+		if(!confirm('{\$lang->overagelaw_disallow_confirm}'))
 		{
 			Event.stop();
 		}
@@ -112,19 +112,19 @@ opt=Opt In/Out",
 	}
 	elseif(substr($mybb->version, 0, 3) == '1.8')
 	{
-		find_replace_templatesets("footer", "#".preg_quote('{$lang->bottomlinks_syndication}</a></li>')."#i", '{$lang->bottomlinks_syndication}</a></li>'."\n\t\t\t\t".'<li><a href="{$mybb->settings[\'bburl\']}/misc.php?action=cookielaw_info">{$lang->cookielaw_footer}</a></li>');
+		find_replace_templatesets("footer", "#".preg_quote('{$lang->bottomlinks_syndication}</a></li>')."#i", '{$lang->bottomlinks_syndication}</a></li>'."\n\t\t\t\t".'<li><a href="{$mybb->settings[\'bburl\']}/misc.php?action=overagelaw_info">{$lang->overagelaw_footer}</a></li>');
 
 		$js_header = "jQuery(document).ready(function() {
-	jQuery('#cookies .cookielaw_disallow').click(function() {
-		if(!confirm('{\$lang->cookielaw_disallow_confirm}'))
+	jQuery('#overages .overagelaw_disallow').click(function() {
+		if(!confirm('{\$lang->overagelaw_disallow_confirm}'))
 		{
 			return false;
 		}
 	});
 });";
 		$js_info = "jQuery(document).ready(function() {
-	jQuery('#container .cookielaw_disallow').click(function() {
-		if(!confirm('{\$lang->cookielaw_disallow_confirm}'))
+	jQuery('#container .overagelaw_disallow').click(function() {
+		if(!confirm('{\$lang->overagelaw_disallow_confirm}'))
 		{
 			return false;
 		}
@@ -134,10 +134,10 @@ opt=Opt In/Out",
 	
 	$templates = array();
 	$templates[] = array(
-		"title" => "cookielaw_info",
+		"title" => "overagelaw_info",
 		"template" => "<html>
 <head>
-<title>{\$lang->cookielaw_info_title}</title>
+<title>{\$lang->overagelaw_info_title}</title>
 {\$headerinclude}
 <script type=\"text/javascript\">
 ".$js_info."
@@ -145,21 +145,21 @@ opt=Opt In/Out",
 </head>
 <body>
 {\$header}
-<form action=\"{\$mybb->settings['bburl']}/misc.php?action=cookielaw_change\" method=\"post\">
+<form action=\"{\$mybb->settings['bburl']}/misc.php?action=overagelaw_change\" method=\"post\">
 	<table border=\"0\" cellspacing=\"{\$theme['borderwidth']}\" cellpadding=\"{\$theme['tablespace']}\" class=\"tborder\">
 		<tr>		
-			<td class=\"thead\" colspan=\"4\"><strong>{\$lang->cookielaw_header}</strong></td>
+			<td class=\"thead\" colspan=\"4\"><strong>{\$lang->overagelaw_header}</strong></td>
 		</tr>
 		<tr>		
-			<td class=\"trow1\" colspan=\"4\">{\$lang->cookielaw_description}</td>
+			<td class=\"trow1\" colspan=\"4\">{\$lang->overagelaw_description}</td>
 		</tr>
 		<tr>		
-			<td class=\"tcat\"><strong>{\$lang->cookielaw_info_cookie_name}</strong></td>
-			<td class=\"tcat\"><strong>{\$lang->cookielaw_info_cookie_description}</strong></td>
-			<td class=\"tcat\" align=\"center\"><strong>{\$lang->cookielaw_info_cookies_set_logged_in}</strong></td>
-			<td class=\"tcat\" align=\"center\"><strong>{\$lang->cookielaw_info_cookies_set_guest}</strong></td>
+			<td class=\"tcat\"><strong>{\$lang->overagelaw_info_overage_name}</strong></td>
+			<td class=\"tcat\"><strong>{\$lang->overagelaw_info_overage_description}</strong></td>
+			<td class=\"tcat\" align=\"center\"><strong>{\$lang->overagelaw_info_overages_set_logged_in}</strong></td>
+			<td class=\"tcat\" align=\"center\"><strong>{\$lang->overagelaw_info_overages_set_guest}</strong></td>
 		</tr>
-		{\$cookies_rows}
+		{\$overages_rows}
 		<tr>		
 			<td class=\"tfoot\" colspan=\"4\"><div style=\"text-align: center;\">{\$buttons}</div></td>
 		</tr>
@@ -170,18 +170,18 @@ opt=Opt In/Out",
 </html>"
 	);
 	$templates[] = array(
-		"title" => "cookielaw_header",
+		"title" => "overagelaw_header",
 		"template" => "<script type=\"text/javascript\">
 ".$js_header."
 </script>
-<div id=\"cookies\" style=\"width: 100%; text-align: left; margin-bottom: 10px;\">
-	<form action=\"{\$mybb->settings['bburl']}/misc.php?action=cookielaw_change\" method=\"post\">
+<div id=\"overages\" style=\"width: 100%; text-align: left; margin-bottom: 10px;\">
+	<form action=\"{\$mybb->settings['bburl']}/misc.php?action=overagelaw_change\" method=\"post\">
 		<table border=\"0\" cellspacing=\"{\$theme['borderwidth']}\" cellpadding=\"{\$theme['tablespace']}\" class=\"tborder\">
 			<tr>		
-				<td class=\"thead\"><strong>{\$lang->cookielaw_header}</strong></td>
+				<td class=\"thead\"><strong>{\$lang->overagelaw_header}</strong></td>
 			</tr>
 			<tr>		
-				<td class=\"trow1\">{\$lang->cookielaw_description}<br /><br />{\$lang->cookielaw_description_setcookie}</td>
+				<td class=\"trow1\">{\$lang->overagelaw_description}<br /><br />{\$lang->overagelaw_description_setoverage}</td>
 			</tr>
 			<tr>		
 				<td class=\"tfoot\"><div class=\"float_right\">{\$buttons}</div></td>
@@ -191,21 +191,21 @@ opt=Opt In/Out",
 </div>"
 	);
 	$templates[] = array(
-		"title" => "cookielaw_buttons_notify",
-		"template" => "<input type=\"submit\" name=\"okay\" value=\"{\$lang->cookielaw_ok}\" />{\$more_info}<input type=\"hidden\" name=\"my_post_key\" value=\"{\$mybb->post_code}\" />"
+		"title" => "overagelaw_buttons_notify",
+		"template" => "<input type=\"submit\" name=\"okay\" value=\"{\$lang->overagelaw_ok}\" />{\$more_info}<input type=\"hidden\" name=\"my_post_key\" value=\"{\$mybb->post_code}\" />"
 	);
 	$templates[] = array(
-		"title" => "cookielaw_buttons_opt",
-		"template" => "<input type=\"submit\" name=\"allow\" value=\"{\$lang->cookielaw_allow}\" /> <input type=\"submit\" name=\"disallow\" class=\"cookielaw_disallow\" value=\"{\$lang->cookielaw_disallow}\" />{\$more_info}<input type=\"hidden\" name=\"my_post_key\" value=\"{\$mybb->post_code}\" />"
+		"title" => "overagelaw_buttons_opt",
+		"template" => "<input type=\"submit\" name=\"allow\" value=\"{\$lang->overagelaw_allow}\" /> <input type=\"submit\" name=\"disallow\" class=\"overagelaw_disallow\" value=\"{\$lang->overagelaw_disallow}\" />{\$more_info}<input type=\"hidden\" name=\"my_post_key\" value=\"{\$mybb->post_code}\" />"
 	);
 	$templates[] = array(
-		"title" => "cookielaw_button_more_info",
-		"template" => "<input type=\"submit\" name=\"more_info\" value=\"{\$lang->cookielaw_more_info}\" />"
+		"title" => "overagelaw_button_more_info",
+		"template" => "<input type=\"submit\" name=\"more_info\" value=\"{\$lang->overagelaw_more_info}\" />"
 	);
 	$templates[] = array(
-		"title" => "cookielaw_header_no_cookies",
-		"template" => "<div id=\"cookies\" style=\"display: inline-block; text-align: left; margin-bottom: 10px; padding: 4px; font-size: 10px; border: 1px solid #000000;\">
-	{\$lang->cookielaw_description_no_cookies}
+		"title" => "overagelaw_header_no_overages",
+		"template" => "<div id=\"overages\" style=\"display: inline-block; text-align: left; margin-bottom: 10px; padding: 4px; font-size: 10px; border: 1px solid #000000;\">
+	{\$lang->overagelaw_description_no_overages}
 </div>"
 	);
 	
@@ -224,36 +224,36 @@ opt=Opt In/Out",
 	}
 }
 
-function cookielaw_deactivate()
+function overagelaw_deactivate()
 {
 	global $mybb, $db;
 	
 	require_once MYBB_ROOT . 'inc/adminfunctions_templates.php';
 	
-	$db->delete_query("settinggroups", "name = 'cookielaw'");
+	$db->delete_query("settinggroups", "name = 'overagelaw'");
 	
 	$settings = array(
-		"cookielaw_method"
+		"overagelaw_method"
 	);
 	$settings = "'" . implode("','", $settings) . "'";
 	$db->delete_query("settings", "name IN ({$settings})");
 	
 	rebuild_settings();
 	
-	find_replace_templatesets("header", "#".preg_quote('{$cookielaw}')."#i", '', 0);
+	find_replace_templatesets("header", "#".preg_quote('{$overagelaw}')."#i", '', 0);
 	if(substr($mybb->version, 0, 3) == '1.6')
 	{
-		find_replace_templatesets("footer", "#".preg_quote(' | <a href="{$mybb->settings[\'bburl\']}/misc.php?action=cookielaw_info">{$lang->cookielaw_footer}</a>')."#i", '', 0);
+		find_replace_templatesets("footer", "#".preg_quote(' | <a href="{$mybb->settings[\'bburl\']}/misc.php?action=overagelaw_info">{$lang->overagelaw_footer}</a>')."#i", '', 0);
 	}
 	elseif(substr($mybb->version, 0, 3) == '1.8')
 	{
-		find_replace_templatesets("footer", "#".preg_quote("\n\t\t\t\t".'<li><a href="{$mybb->settings[\'bburl\']}/misc.php?action=cookielaw_info">{$lang->cookielaw_footer}</a></li>')."#i", '', 0);
+		find_replace_templatesets("footer", "#".preg_quote("\n\t\t\t\t".'<li><a href="{$mybb->settings[\'bburl\']}/misc.php?action=overagelaw_info">{$lang->overagelaw_footer}</a></li>')."#i", '', 0);
 	}
 	
-	$db->delete_query("templates", "title IN ('cookielaw_info','cookielaw_header','cookielaw_buttons_notify','cookielaw_buttons_opt','cookielaw_button_more_info','cookielaw_header_no_cookies')");
+	$db->delete_query("templates", "title IN ('overagelaw_info','overagelaw_header','overagelaw_buttons_notify','overagelaw_buttons_opt','overagelaw_button_more_info','overagelaw_header_no_overages')");
 }
 
-function cookielaw_global_start()
+function overagelaw_global_start()
 {
 
 	global $templatelist;
@@ -263,16 +263,16 @@ function cookielaw_global_start()
 		$templatelist = '';
 	}
 
-	$templatelist .= ', cookielaw_button_more_info, cookielaw_buttons_notify, cookielaw_header';
+	$templatelist .= ', overagelaw_button_more_info, overagelaw_buttons_notify, overagelaw_header';
 }
 
-function cookielaw_global_intermediate()
+function overagelaw_global_intermediate()
 {
-	global $mybb, $lang, $templates, $theme, $cookielaw;
+	global $mybb, $lang, $templates, $theme, $overagelaw;
 	
-	$lang->load('cookielaw');
+	$lang->load('overagelaw');
 
-	if(!isset($mybb->cookies['mybb']['allow_cookies']))
+	if(!isset($mybb->overages['mybb']['allow_overages']))
 	{
 		if(substr($mybb->version, 0, 3) == '1.6')
 		{
@@ -280,81 +280,81 @@ function cookielaw_global_intermediate()
 			$theme = array('borderwidth' => 1, 'tablespace' => 4);
 		}
 
-		eval("\$more_info = \"".$templates->get("cookielaw_button_more_info")."\";");
-		eval("\$buttons = \"".$templates->get("cookielaw_buttons_".$mybb->settings['cookielaw_method'])."\";");
-		eval("\$cookielaw = \"".$templates->get("cookielaw_header")."\";");
+		eval("\$more_info = \"".$templates->get("overagelaw_button_more_info")."\";");
+		eval("\$buttons = \"".$templates->get("overagelaw_buttons_".$mybb->settings['overagelaw_method'])."\";");
+		eval("\$overagelaw = \"".$templates->get("overagelaw_header")."\";");
 	}
-	elseif(isset($mybb->cookies['mybb']['allow_cookies']) && $mybb->cookies['mybb']['allow_cookies'] == '0')
+	elseif(isset($mybb->overages['mybb']['allow_overages']) && $mybb->overages['mybb']['allow_overages'] == '0')
 	{
-		$lang->cookielaw_description_no_cookies = $lang->sprintf($lang->cookielaw_description_no_cookies, $mybb->settings['bburl']);
-		eval("\$cookielaw = \"".$templates->get("cookielaw_header_no_cookies")."\";");
+		$lang->overagelaw_description_no_overages = $lang->sprintf($lang->overagelaw_description_no_overages, $mybb->settings['bburl']);
+		eval("\$overagelaw = \"".$templates->get("overagelaw_header_no_overages")."\";");
 	}
 	
-	cookielaw_clear_cookies();
+	overagelaw_clear_overages();
 }
 
-function cookielaw_global_end()
+function overagelaw_global_end()
 {
-	 cookielaw_clear_cookies();
+	 overagelaw_clear_overages();
 }
 
-function cookielaw_misc()
+function overagelaw_misc()
 {
-	global $mybb, $lang, $templates, $theme, $cookielaw_info, $header, $headerinclude, $footer;
+	global $mybb, $lang, $templates, $theme, $overagelaw_info, $header, $headerinclude, $footer;
 	
-	$lang->load('cookielaw');
+	$lang->load('overagelaw');
 	
-	if($mybb->input['action'] == 'cookielaw_change')
+	if($mybb->input['action'] == 'overagelaw_change')
 	{
 		if(isset($mybb->input['more_info']))
 		{
 			// hack to show no redirect
 			$mybb->settings['redirects'] = 0;
-			redirect('misc.php?action=cookielaw_info');
+			redirect('misc.php?action=overagelaw_info');
 		}
 		else
 		{
 			if(isset($mybb->input['disallow']))
 			{
-				cookielaw_clear_cookies();
-				my_setcookie('mybb[allow_cookies]', '0');
+				overagelaw_clear_overages();
+				my_setoverage('mybb[allow_overages]', '0');
 			}
 			else
 			{
-				my_setcookie('mybb[allow_cookies]', '1');
+				my_setoverage('mybb[allow_overages]', '1');
 
 				if($mybb->input['okay'])
 				{
-					$lang->cookielaw_redirect = '';
+					$lang->overagelaw_redirect = '';
 				}
 			}
-			redirect('index.php', $lang->cookielaw_redirect);
+			redirect('index.php', $lang->overagelaw_redirect);
 		}
 	}
-	elseif($mybb->input['action'] == 'cookielaw_info')
+	elseif($mybb->input['action'] == 'overagelaw_info')
 	{
-		$cookies_rows = '';
-		$cookies = cookielaw_get_cookies();
-		foreach($cookies as $cookie_name => $info)
+		$overages_rows = '';
+		$overages = overagelaw_get_overages();
+		foreach($overages as $overage_name => $info)
 		{
 			if(isset($info['mod']) || isset($info['admin']))
 			{
-				$cookie_user_type = '';
+				$overage_user_type = '';
 				if($info['mod'])
 				{
-					$cookie_user_type = $lang->cookielaw_info_cookies_set_mod;
+					$overage_user_type = $lang->overagelaw_info_overages_set_mod;
 				}
 				elseif($info['admin'])
 				{
-					$cookie_user_type = $lang->cookielaw_info_cookies_set_admin;
+					$overage_user_type = $lang->overagelaw_info_overages_set_admin;
 				}
 				
 				$trow = alt_trow();
-				$cookie_description = 'cookielaw_cookie_'.$cookie_name.'_desc';
-				$cookies_rows .= '<tr>
-					<td class="'.$trow.'">'.$cookie_name.'</td>
-					<td class="'.$trow.'">'.$lang->$cookie_description.'</td>
-					<td class="'.$trow.'" align="center">'.$cookie_user_type.'</td>
+				$overage_description = 'overagelaw_overage_'.$overage_name.'_desc';
+				$overages_rows .= '<tr>
+					<td class="'.$trow.'">'.$overage_name.'</td>
+					<td class="'.$trow.'">'.$lang->$overage_description.'</td>
+					<td class="'.$trow.'" align="center">'.$overage_user_type.'</td>
 					<td class="'.$trow.'" align="center">-</td>
 				</tr>';
 			}
@@ -368,63 +368,63 @@ function cookielaw_misc()
 				{
 					$ext = 'png';
 				}
-				$cookie_member = $cookie_guest = '';
+				$overage_member = $overage_guest = '';
 				if($info['member'])
 				{
-					$cookie_member = '<img src="'.$mybb->settings['bburl'].'/images/valid.'.$ext.'" alt="" title="" />';
+					$overage_member = '<img src="'.$mybb->settings['bburl'].'/images/valid.'.$ext.'" alt="" title="" />';
 				}
 				else
 				{
-					$cookie_member = '<img src="'.$mybb->settings['bburl'].'/images/invalid.'.$ext.'" alt="" title="" />';
+					$overage_member = '<img src="'.$mybb->settings['bburl'].'/images/invalid.'.$ext.'" alt="" title="" />';
 				}
 				if($info['guest'])
 				{
-					$cookie_guest = '<img src="'.$mybb->settings['bburl'].'/images/valid.'.$ext.'" alt="" title="" />';
+					$overage_guest = '<img src="'.$mybb->settings['bburl'].'/images/valid.'.$ext.'" alt="" title="" />';
 				}
 				else
 				{
-					$cookie_guest = '<img src="'.$mybb->settings['bburl'].'/images/invalid.'.$ext.'" alt="" title="" />';
+					$overage_guest = '<img src="'.$mybb->settings['bburl'].'/images/invalid.'.$ext.'" alt="" title="" />';
 				}
 				$trow = alt_trow();
-				$cookie_description = 'cookielaw_cookie_'.$cookie_name.'_desc';
-				$cookies_rows .= '<tr>
-					<td class="'.$trow.'">'.$cookie_name.'</td>
-					<td class="'.$trow.'">'.$lang->$cookie_description.'</td>
-					<td class="'.$trow.'" align="center">'.$cookie_member.'</td>
-					<td class="'.$trow.'" align="center">'.$cookie_guest.'</td>
+				$overage_description = 'overagelaw_overage_'.$overage_name.'_desc';
+				$overages_rows .= '<tr>
+					<td class="'.$trow.'">'.$overage_name.'</td>
+					<td class="'.$trow.'">'.$lang->$overage_description.'</td>
+					<td class="'.$trow.'" align="center">'.$overage_member.'</td>
+					<td class="'.$trow.'" align="center">'.$overage_guest.'</td>
 				</tr>';
 			}
 		}
 		
-		if($mybb->settings['cookielaw_method'] == 'opt')
+		if($mybb->settings['overagelaw_method'] == 'opt')
 		{
-			eval("\$buttons = \"".$templates->get("cookielaw_buttons_".$mybb->settings['cookielaw_method'])."\";");
+			eval("\$buttons = \"".$templates->get("overagelaw_buttons_".$mybb->settings['overagelaw_method'])."\";");
 		}
-		eval("\$cookielaw_info = \"".$templates->get("cookielaw_info")."\";");
-		output_page($cookielaw_info);
+		eval("\$overagelaw_info = \"".$templates->get("overagelaw_info")."\";");
+		output_page($overagelaw_info);
 	}
 }
 
-function cookielaw_clear_cookies()
+function overagelaw_clear_overages()
 {
 	global $mybb, $session;
 	
-	if(isset($mybb->cookies['mybb']['allow_cookies']) && $mybb->cookies['mybb']['allow_cookies'] == '0' && !defined('IN_ADMINCP'))
+	if(isset($mybb->overages['mybb']['allow_overages']) && $mybb->overages['mybb']['allow_overages'] == '0' && !defined('IN_ADMINCP'))
 	{
-		$cookies = cookielaw_get_cookies(true);
-		foreach($cookies as $cookie_name => $info)
+		$overages = overagelaw_get_overages(true);
+		foreach($overages as $overage_name => $info)
 		{
-			if($cookie_name == 'mybb[allow_cookies]')
+			if($overage_name == 'mybb[allow_overages]')
 			{
 				continue;
 			}
-			my_unsetcookie($cookie_name);
+			my_unsetoverage($overage_name);
 		}
-		foreach($mybb->cookies as $key => $val)
+		foreach($mybb->overages as $key => $val)
 		{
 			if(strpos($key, 'inlinemod_') !== false)
 			{
-				my_unsetcookie($key);
+				my_unsetoverage($key);
 			}
 		}
 		unset($mybb->user);
@@ -433,11 +433,11 @@ function cookielaw_clear_cookies()
 	}
 }
 
-function cookielaw_get_cookies($all = false)
+function overagelaw_get_overages($all = false)
 {
 	global $mybb;
 	
-	$cookies = array(
+	$overages = array(
 		'sid' => array(
 			'member' => true,
 			'guest' => true
@@ -522,7 +522,7 @@ function cookielaw_get_cookies($all = false)
 			'member' => false,
 			'guest' => true
 		),
-		'mybb[allow_cookies]' => array(
+		'mybb[allow_overages]' => array(
 			'member' => true,
 			'guest' => true
 		)
@@ -530,23 +530,23 @@ function cookielaw_get_cookies($all = false)
 	
 	if($all || is_moderator())
 	{
-		$cookies['inlinemod_*'] = array(
+		$overages['inlinemod_*'] = array(
 			'mod' => true
 		);
 	}
 	
 	if($all || $mybb->usergroup['cancp'] == 1)
 	{
-		$cookies['adminsid'] = array(
+		$overages['adminsid'] = array(
 			'admin' => true
 		);
-		$cookies['acploginattempts'] = array(
+		$overages['acploginattempts'] = array(
 			'admin' => true
 		);
-		$cookies['acpview'] = array(
+		$overages['acpview'] = array(
 			'admin' => true
 		);
 	}
 	
-	return $cookies;
+	return $overages;
 }
